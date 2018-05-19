@@ -14,15 +14,20 @@
     },
     computed: {
       Sclasses () {
+        // 设置一个空数组
         let arr = []
         const {score} = this
+        // 获取score的整数部分，确定on的个数
         const scoreInteger = Math.floor(score)
         for (let i = 0; i < scoreInteger; i++) {
           arr.push(classOn)
         }
+        // 判断score的小数部分是否大于等于0.5来确定是否需要half
+        // 因为小数的计算不准确，所以乘以10
         if (score * 10 - scoreInteger * 10 >= 5) {
           arr.push(classHalf)
         }
+        // 当arr的长度小于5时，添加off
         while (arr.length < 5) {
           arr.push(classOff)
         }

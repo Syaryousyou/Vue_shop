@@ -10,13 +10,20 @@
   import {mapActions} from 'vuex'
   export default {
     mounted () {
+      /* 在组件中调用actions的两种方式 */
+      // 第一种直接在用this.$store.dispatch('actionName')
+      // this.$store.dispatch('getAddress')
+
+      // 第二种在methods中，通过vuex的mapActions方法，将
+      // 对应的action映射为method，调用该method
       this.getAddress()
+      this.$store.dispatch('getUserInfo')
     },
     components: {
       FooterGuide
     },
     methods: {
-      ...mapActions(['getAddress'])
+      ...mapActions(['getAddress', 'getUserInfo'])
     }
   }
 </script>

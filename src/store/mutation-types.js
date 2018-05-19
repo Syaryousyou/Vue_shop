@@ -1,3 +1,8 @@
 export const RECEIVE_ADDRESS = 'receive_address'
 export const RECEIVE_CATEGORYS = 'receive_categorys'
 export const RECEIVE_SHOPS = 'receive_shops'
+export const RECEIVE_USERINFO = 'receive_userinfo'
+export const RESET_USERINFO = 'reset_userinfo'
+export const RECEIVE_SHOPGOODS = 'receive_shopgoods'
+export const RECEIVE_SHOPRATINGS = 'receive_shopratings'
+export const RECEIVE_SHOPINFO = 'receive_shopinfo'

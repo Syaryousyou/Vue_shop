@@ -5,8 +5,11 @@
       <span class="header_search" slot="left" @click="$router.push('/search')">
         <i class="iconfont icon-sousuo"></i>
       </span>
-      <span class="header_login" slot="right">
-        <span class="header_login_text" @click="$router.push('/login')">登录|注册</span>
+      <span class="header_login" slot="right" @click="$router.push('/userinfo')">
+        <span class="header_login_text" v-if="!userInfo._id">登录|注册</span>
+        <span class="header_login_text" v-else>
+          <i class="iconfont icon-person"></i>
+        </span>
       </span>
     </HeaderTop>
     <!--首页导航-->
@@ -56,16 +59,22 @@
       this.$store.dispatch('getShops')
     },
     computed: {
-      ...mapState(['address', 'categorys']),
+      ...mapState(['address', 'categorys', 'userInfo']),
+      // 二维数组
       categoryArr () {
+        // 准备空的二维数组
         let arr = []
+        // 准备空的小数组(最大长度为8)
         let minArr = []
         const max = 8
+        // 遍历请求拿到的列表
         this.categorys.forEach((category, index) => {
+          // 如果小数组是空的，将小数组保存到大数组中
           if (minArr.length === 0) {
             arr.push(minArr)
           }
           minArr.push(category)
+          // 当小数组长度为8后，创建一个新的数组
           if (minArr.length === max) {
             minArr = []
           }
@@ -74,9 +83,21 @@
       }
     },
     watch: {
-      categorys (value) {
+      categorys (value) { // categorys数组中有数据了, 在异步更新界面之前执行
+        // 使用setTimeout可以实现效果, 但不是太好
+        /* setTimeout(() => {
+         // 创建一个Swiper实例对象, 来实现轮播
+         new Swiper('.swiper-container', {
+           loop: true, // 可以循环轮播
+           // 如果需要分页器
+           pagination: {
+             el: '.swiper-pagination',
+           },
+         })
+       }, 100) */
+        // 界面更新就立即创建swiper对象
         /* eslint-disable no-new */
-        this.$nextTick(() => {
+        this.$nextTick(() => { // 一旦完成界面更新, 立即调用(此条语句要写在数据更新之后)
           new Swiper('.swiper-container', {
             loop: true,
             // 如果需要分页器

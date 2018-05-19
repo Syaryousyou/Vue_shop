@@ -15,7 +15,7 @@
               <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
               <button :disabled="!rightPhone" class="get_verification"
                       :class="{right_phone: rightPhone}" @click.prevent="getCode">
-                {{computedTime ? '已发送'+computedTime + 's' : '获取验证码'}}</button>
+                {{computedTime ? '已发送'+computedTime + 's' : '获取验证码' }}</button>
             </section>
             <section class="login_verification">
               <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
@@ -40,7 +40,8 @@
               </section>
               <section class="login_message">
                 <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
-                <img class="get_verification" src="./images/captcha.svg" alt="captcha">
+                <!--注：在此通过src请求端口4000不涉及跨域，因为不是ajax请求-->
+                <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="getCaptcha" ref="img">
               </section>
             </section>
           </div>
@@ -58,10 +59,11 @@
 
 <script>
   import AlertTip from '../../components/AlertTip/AlertTip'
+  import {reqSendMssage, reqLogin, reqLoginSms} from '../../api'
   export default {
     data () {
       return {
-        loginWay: true, // true为短信登录， false为密码登录
+        loginWay: false, // true为短信登录， false为密码登录
         phone: '', // 手机号
         code: '', // 短信验证码
         computedTime: 0, // 手机验证码计时器
@@ -79,16 +81,40 @@
       }
     },
     methods: {
+      // 点击获取图片验证码
+      getCaptcha () {
+        // 通过更新img标签的src属性点击验证码图片后，重新获取一张新的图片
+        // 注：img的src属性本是'http://localhost:4000/captcha'，如果点击后更改的
+        // 仍是原来的src就不会重新获取，所以在原先的src属性值后，加上时间参数，
+        // 从而区分每次点击的src属性值都是不同的
+        this.$refs.img.src = 'http://localhost:4000/captcha?time=' + Date.now()
+      },
       // 获取短信验证码
-      getCode () {
+      async getCode () {
+        // 开启倒计时
+        // if判断计时是否是0，如果不是0重新点击无效
         if (!this.computedTime) {
           this.computedTime = 30
-          const intervalId = setInterval(() => {
+          this.intervalId = setInterval(() => {
             this.computedTime--
             if (this.computedTime <= 0) {
-              clearInterval(intervalId)
+              clearInterval(this.intervalId)
             }
           }, 1000)
+          // 发送ajax请求,获取短信验证码
+          const result = await reqSendMssage(this.phone)
+          // 短信验证码发送失败
+          if (result.code === 1) {
+            // 如果定时器还未走完，清除定时器
+            if (this.computedTime) {
+              clearInterval(this.intervalId)
+              // 将计时器赋值为0，button的文本信息显示回'获取验证码'
+              this.computedTime = 0
+              this.intervalId = null
+            }
+            // 显示提示框
+            this.showAlert(result.msg)
+          }
         }
       },
       // 是否显示提示框
@@ -96,28 +122,51 @@
         this.alertShow = true
         this.alertText = alertText
       },
-      login () {
+      async login () {
         const {rightPhone, phone, code} = this
         const {name, pwd, captcha} = this
+        let result
         if (this.loginWay) {
           if (!rightPhone) {
             // 请输入有效的号码
             this.showAlert('请输入有效的号码')
+            return
           } else if (!/^\d{6}$/.test(code)) {
             // 验证码必须是6位数字
             this.showAlert('验证码必须是6位数字')
+            return
           }
+          result = await reqLoginSms(phone, code)
         } else {
           if (!name) {
             // 请输入用户名
             this.showAlert('请输入用户名')
+            return
           } else if (!pwd) {
             // 请输入密码
             this.showAlert('请输入密码')
+            return
           } else if (!captcha) {
             // 请输入验证码
             this.showAlert('请输入验证码')
+            return
           }
+          result = await reqLogin({name, pwd, captcha})
+        }
+        if (this.computedTime) {
+          clearInterval(this.intervalId)
+          this.computedTime = 0
+        }
+        if (result.code === 0) {
+          // 保存user信息
+          const user = result.data
+          this.$store.dispatch('restoreUserInfo', user)
+          // 跳转到个人中心
+          this.$router.replace('/profile')
+        } else {
+          // 请求失败后，显示提示框
+          this.showAlert(result.msg)
+          this.getCaptcha()
         }
       },
       closeTip () {
