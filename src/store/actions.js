@@ -44,12 +44,13 @@ export default {
       commit(RESET_USERINFO)
     }
   },
-  async getShopGoods ({commit}) {
-    const result = await reqShopGoods
+  async getShopGoods ({commit}, callback) {
+    const result = await reqShopGoods()
     if (result.code === 0) {
       const shopGoods = result.data
       commit(RECEIVE_SHOPGOODS, {shopGoods})
     }
+    callback && callback()
   },
   async getShopRatings ({commit}) {
     const result = await reqShopRatings()

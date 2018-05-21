@@ -5,7 +5,7 @@
       <span class="header_search" slot="left" @click="$router.push('/search')">
         <i class="iconfont icon-sousuo"></i>
       </span>
-      <span class="header_login" slot="right" @click="$router.push('/userinfo')">
+      <span class="header_login" slot="right" @click="$router.push(!userInfo._id ? '/login' : '/userinfo')">
         <span class="header_login_text" v-if="!userInfo._id">登录|注册</span>
         <span class="header_login_text" v-else>
           <i class="iconfont icon-person"></i>

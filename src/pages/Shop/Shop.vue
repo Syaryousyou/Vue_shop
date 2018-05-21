@@ -32,6 +32,7 @@
     height 40px
     line-height 40px
     bottom-border-1px(rgba(7, 17, 27, 0.1))
+    background #fff
     .tab-item
       float left
       width: 33.33333%
@@ -40,6 +41,16 @@
       color rgb(77, 85, 93)
       a
         display block
+        position relative
         &.router-link-active
           color #02a774
+          &::after
+            content ''
+            position absolute
+            bottom 1px
+            left 50%
+            transform translateX(-50%)
+            width 37px
+            height 2px
+            background #02a774
 </style>
