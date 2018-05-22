@@ -11,7 +11,8 @@ import {
   RECEIVE_SHOPRATINGS,
   RECEIVE_SHOPINFO,
   INCREMENT_FOOD_COUNT,
-  DECREMENT_FOOD_COUNT
+  DECREMENT_FOOD_COUNT,
+  CLEAR_FOOD_CONT
 } from './mutation-types'
 import {reqAddress, reqFoodCategorys, reqShops, reqUserInfo, reqLogout, reqShopGoods, reqShopRatings, reqShopInfo} from '../api'
 export default {
@@ -47,18 +48,20 @@ export default {
     }
   },
   async getShopGoods ({commit}, callback) {
+    // console.log('----')
     const result = await reqShopGoods()
     if (result.code === 0) {
       const shopGoods = result.data
       commit(RECEIVE_SHOPGOODS, {shopGoods})
+      callback && callback()
     }
-    callback && callback()
   },
-  async getShopRatings ({commit}) {
+  async getShopRatings ({commit}, callback) {
     const result = await reqShopRatings()
     if (result.code === 0) {
       const shopRatings = result.data
       commit(RECEIVE_SHOPRATINGS, {shopRatings})
+      callback && callback()
     }
   },
   async getShopInfo ({commit}) {
@@ -74,5 +77,8 @@ export default {
     } else {
       commit(DECREMENT_FOOD_COUNT, {food})
     }
+  },
+  clearCart ({commit}) {
+    commit(CLEAR_FOOD_CONT)
   }
 }

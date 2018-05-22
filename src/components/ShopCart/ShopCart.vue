@@ -10,36 +10,42 @@
             <div class="num" v-show="totalCount">{{totalCount}}</div>
           </div>
           <div class="price" :class="{highlight: totalCount}">￥{{totalPrice}}</div>
-          <div class="desc">另需配送费￥{{shopInfo.deliveryPrice}}元</div>
+          <div class="desc" >另需配送费￥{{shopInfo.deliveryPrice}}元</div>
         </div>
         <div class="content-right">
-          <div class="pay" :class="payClass">
+          <div class="pay" :class="payClass" @click="pay">
             {{payText}}
           </div>
         </div>
       </div>
-      <div class="shopcart-list" v-show="listShow">
-        <div class="list-header">
-          <h1 class="title">购物车</h1>
-          <span class="empty">清空</span>
+      <transition name="move">
+        <div class="shopcart-list" v-show="listShow">
+          <div class="list-header">
+            <h1 class="title">购物车</h1>
+            <span class="empty" @click="clearCart">清空</span>
+          </div>
+          <div class="list-content">
+            <ul>
+              <li class="food" v-for="(food, index) in cartFoods" :key="index">
+                <span class="name">{{food.name}}</span>
+                <div class="price"><span>￥{{food.price}}</span></div>
+                <div class="cartcontrol-wrapper">
+                  <CartControl :food="food"/>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="list-content">
-          <ul>
-            <li class="food" v-for="(food, index) in cartFoods" :key="index">
-              <span class="name">{{food.name}}</span>
-              <div class="price"><span>￥{{food.price}}</span></div>
-              <div class="cartcontrol-wrapper">
-                <CartControl :food="food"/>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+      </transition>
     </div>
-    <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    <transition name="fade">
+      <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    </transition>
   </div>
 </template>
 <script>
+  import {MessageBox, Toast} from 'mint-ui'
+  import Bscroll from 'better-scroll'
   import {mapState, mapGetters} from 'vuex'
   import CartControl from '../../components/CartControl/CartControl'
   export default {
@@ -68,9 +74,26 @@
         }
       },
       listShow () {
+        // 如果总数为0，直接不显示
         if (this.totalCount === 0) {
           this.isShow = false
           return false
+        }
+        if (this.isShow) {
+          this.$nextTick(() => {
+            // Bscroll不可以创建多个，需要是单例
+            // 否则在点击添加购物车时，会点击一次添加多个
+            // 原因：better-scroll禁用了原生的dom事件, 使用的是自定义事件
+            if (!this.scroll) {
+              this.scroll = new Bscroll('.list-content', {
+                click: true
+              })
+            } else {
+              // 如果Bscroll为单例对象后，隐藏购物车后，再次点击显示时，滑动效果会在第一次滑动时失效
+              // 调用refresh方法
+              this.scroll.refresh()
+            }
+          })
         }
         return this.isShow
       }
@@ -82,6 +105,21 @@
           return false
         }
         this.isShow = !this.isShow
+      },
+      clearCart () {
+        MessageBox.confirm('确定要清空购物车吗?').then(action => {
+          this.$store.dispatch('clearCart')
+        }, () => {})
+      },
+      pay () {
+        // if (this.payText === '去结算') {
+        //   Toast(`需要支付${this.totalPrice}元`)
+        // }
+        const {totalPrice} = this
+        const {minPrice} = this.shopInfo
+        if (totalPrice >= minPrice) {
+          Toast(`需要支付${totalPrice}元`)
+        }
       }
     },
     components: {
@@ -199,9 +237,9 @@
       z-index -1
       width 100%
       transform translateY(-100%)
-      &.swipe-enter-active, &.swipe-leave-active
+      &.move-enter-active, &.move-leave-active
         transition transform .3s
-      &.swipe-enter, &.swipe-leave-to
+      &.move-enter, &.move-leave-to
         transform translateY(0)
       .list-header
         height 40px
@@ -217,7 +255,6 @@
           float right
           font-size 12px
           color rgb(0, 160, 220)
-
       .list-content
         padding 0 18px
         max-height 217px

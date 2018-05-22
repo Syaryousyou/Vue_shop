@@ -12,7 +12,8 @@ import {
   RECEIVE_SHOPRATINGS,
   RECEIVE_SHOPINFO,
   INCREMENT_FOOD_COUNT,
-  DECREMENT_FOOD_COUNT
+  DECREMENT_FOOD_COUNT,
+  CLEAR_FOOD_CONT
 } from './mutation-types'
 export default {
   [RECEIVE_ADDRESS] (state, {address}) {
@@ -55,5 +56,15 @@ export default {
     if (!food.count) {
       state.cartFoods.splice(state.cartFoods.indexOf(food), 1)
     }
+  },
+  [CLEAR_FOOD_CONT] (state) {
+    // 将cartFoods中的food的count设置为0
+    // 否则在cartControl等组件中用到food.count的地方仍旧会像是数量
+    state.cartFoods.forEach((food) => {
+      food.count = 0
+    })
+    // 将cartFoods设置为空数组
+    // 否则在购物列表中仍旧有food，
+    state.cartFoods = []
   }
 }
