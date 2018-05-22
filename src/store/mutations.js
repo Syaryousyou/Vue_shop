@@ -13,7 +13,8 @@ import {
   RECEIVE_SHOPINFO,
   INCREMENT_FOOD_COUNT,
   DECREMENT_FOOD_COUNT,
-  CLEAR_FOOD_CONT
+  CLEAR_FOOD_CONT,
+  RECEIVE_SEARCH_SHOPS
 } from './mutation-types'
 export default {
   [RECEIVE_ADDRESS] (state, {address}) {
@@ -66,5 +67,8 @@ export default {
     // 将cartFoods设置为空数组
     // 否则在购物列表中仍旧有food，
     state.cartFoods = []
+  },
+  [RECEIVE_SEARCH_SHOPS] (state, {searchShops}) {
+    state.searchShops = searchShops
   }
 }

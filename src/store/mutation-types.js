@@ -9,3 +9,5 @@ export const RECEIVE_SHOPINFO = 'receive_shopinfo'
 export const INCREMENT_FOOD_COUNT = 'increment_food_count'
 export const DECREMENT_FOOD_COUNT = 'decrement_food_count'
 export const CLEAR_FOOD_CONT = 'clear_food_cont'
+
+export const RECEIVE_SEARCH_SHOPS = 'receive_search_shops'

@@ -12,9 +12,10 @@ import {
   RECEIVE_SHOPINFO,
   INCREMENT_FOOD_COUNT,
   DECREMENT_FOOD_COUNT,
-  CLEAR_FOOD_CONT
+  CLEAR_FOOD_CONT,
+  RECEIVE_SEARCH_SHOPS
 } from './mutation-types'
-import {reqAddress, reqFoodCategorys, reqShops, reqUserInfo, reqLogout, reqShopGoods, reqShopRatings, reqShopInfo} from '../api'
+import {reqAddress, reqFoodCategorys, reqShops, reqUserInfo, reqLogout, reqShopGoods, reqShopRatings, reqShopInfo, reqSearchShops} from '../api'
 export default {
   // 异步获取地址函数
   async getAddress ({commit, state}) {
@@ -80,5 +81,13 @@ export default {
   },
   clearCart ({commit}) {
     commit(CLEAR_FOOD_CONT)
+  },
+  async getSearchShops ({commit, state}, keyWord) {
+    const {latitude, longitude} = state
+    const geohash = latitude + ',' +longitude
+    const result = await reqSearchShops(geohash, keyWord)
+    if (result.code === 0) {
+      commit(RECEIVE_SEARCH_SHOPS, {searchShops:result.data})
+    }
   }
 }
